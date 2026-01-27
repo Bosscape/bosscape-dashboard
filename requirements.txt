@@ -1,0 +1,4 @@
+
+flask
+flask-discord-interactions
+gunicorn

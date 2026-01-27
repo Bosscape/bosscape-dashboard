@@ -1,0 +1,9 @@
+
+<!doctype html>
+<html>
+  <head><title>Dashboard</title></head>
+  <body>
+    <h1>Welcome, {{ user.name }}#{{ user.discriminator }}</h1>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+  </body>
+</html>
