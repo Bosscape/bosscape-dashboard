@@ -23,8 +23,18 @@ def login():
 
 @app.route("/callback/")
 def callback():
-    discord.callback()
+    print("DISCORD CALLBACK HIT")
+
+    try:
+        discord.callback()
+        user = discord.fetch_user()
+        print(f"Logged in user: {user.name} ({user.id})")
+    except Exception as e:
+        print("ERROR DURING DISCORD CALLBACK:", e)
+        raise  # Optional: re-raise to let the error still show in logs
+
     return redirect(url_for("dashboard"))
+
 
 @app.route("/dashboard/")
 @requires_authorization
