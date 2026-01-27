@@ -8,7 +8,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 app.config["DISCORD_CLIENT_ID"] = os.getenv("DISCORD_CLIENT_ID")
 app.config["DISCORD_CLIENT_SECRET"] = os.getenv("DISCORD_CLIENT_SECRET")
-app.config["DISCORD_REDIRECT_URI"] = "https://bosscape.onrender.com/callback"
+app.config["DISCORD_REDIRECT_URI"] = "https://bosscape-dashboard.onrender.com/callback"
 app.config["DISCORD_SCOPE"] = ["identify"]
 
 discord = DiscordOAuth2Session(app)
