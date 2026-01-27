@@ -1,6 +1,6 @@
 
-from flask import Flask, redirect, session, url_for, render_template, request
-from flask_discord_interactions import DiscordOAuth2Session, requires_authorization
+from flask import Flask, redirect, url_for, session, render_template
+from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
 import os
 
 app = Flask(__name__)
@@ -8,7 +8,8 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 app.config["DISCORD_CLIENT_ID"] = os.getenv("DISCORD_CLIENT_ID")
 app.config["DISCORD_CLIENT_SECRET"] = os.getenv("DISCORD_CLIENT_SECRET")
-app.config["DISCORD_REDIRECT_URI"] = "https://www.bosscape.com/callback"
+app.config["DISCORD_REDIRECT_URI"] = "https://bosscape.onrender.com/callback"
+app.config["DISCORD_SCOPE"] = ["identify"]
 
 discord = DiscordOAuth2Session(app)
 
@@ -36,5 +37,6 @@ def logout():
     discord.revoke()
     return redirect(url_for("index"))
 
-if __name__ == "__main__":
-    app.run()
+@app.errorhandler(Unauthorized)
+def redirect_unauthorized(e):
+    return redirect(url_for("login"))
