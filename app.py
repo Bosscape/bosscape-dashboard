@@ -3,6 +3,7 @@ from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthor
 import os
 import socket
 import traceback
+import requests
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-me")
@@ -102,16 +103,59 @@ def view_stats():
 
     hs_url = f"https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player={rsn}"
     response = requests.get(hs_url)
-    stats = response.text.splitlines() if response.status_code == 200 else []
 
-    # Basic stats parsing
-    parsed = {
-        "Attack XP": stats[0].split(",")[2] if len(stats) > 0 else "N/A",
-        "Defence XP": stats[1].split(",")[2] if len(stats) > 1 else "N/A",
-        "Total Level": stats[0].split(",")[1] if len(stats) > 0 else "N/A",
-    }
+    if response.status_code != 200:
+        return "Error fetching stats from OSRS Hiscores.", 500
 
-    return render_template("stats.html", rsn=rsn, stats=parsed)
+    lines = response.text.splitlines()
+    parsed_stats = {}
+    
+    skill_names = [
+        "Overall", "Attack", "Defence", "Strength", "Hitpoints", "Ranged",
+        "Prayer", "Magic", "Cooking", "Woodcutting", "Fletching", "Fishing",
+        "Firemaking", "Crafting", "Smithing", "Mining", "Herblore", "Agility",
+        "Thieving", "Slayer", "Farming", "Runecraft", "Hunter", "Construction",
+        "Sailing"  # Placeholder: not yet on official highscores
+    ]
+
+    for i, skill in enumerate(skill_names[:24]):
+        try:
+            rank, level, xp = lines[i].split(",")
+            parsed_stats[skill] = {
+                "level": level,
+                "xp": xp,
+                "rank": rank
+            }
+        except (ValueError, IndexError):
+            parsed_stats[skill] = {
+                "level": "N/A",
+                "xp": "N/A",
+                "rank": "N/A"
+            }
+
+    # --- Optional: Combat Level Calculation ---
+    def combat_level(stats):
+        try:
+            attack = int(stats["Attack"]["level"])
+            strength = int(stats["Strength"]["level"])
+            defence = int(stats["Defence"]["level"])
+            hitpoints = int(stats["Hitpoints"]["level"])
+            prayer = int(stats["Prayer"]["level"])
+            ranged = int(stats["Ranged"]["level"])
+            magic = int(stats["Magic"]["level"])
+
+            base = 0.25 * (defence + hitpoints + (prayer // 2))
+            melee = 0.325 * (attack + strength)
+            range = 0.325 * ((ranged * 1.5))
+            mage = 0.325 * ((magic * 1.5))
+
+            return round(base + max(melee, range, mage), 2)
+        except:
+            return "N/A"
+
+    parsed_stats["Combat Level"] = combat_level(parsed_stats)
+
+    return render_template("stats.html", rsn=rsn, stats=parsed_stats)
 
 
 if __name__ == "__main__":
