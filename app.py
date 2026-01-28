@@ -11,7 +11,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-me")
 # Discord OAuth2 config
 app.config["DISCORD_CLIENT_ID"] = os.getenv("DISCORD_CLIENT_ID")
 app.config["DISCORD_CLIENT_SECRET"] = os.getenv("DISCORD_CLIENT_SECRET")
-app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:5000/callback"  # Match your live site
+app.config["DISCORD_REDIRECT_URI"] = os.getenv("DISCORD_REDIRECT_URI")
 app.config["DISCORD_SCOPE"] = ["identify"]
 
 discord = DiscordOAuth2Session(app)
