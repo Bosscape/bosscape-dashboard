@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ rsn }}'s Stats</title>
+</head>
+<body>
+  <h1>Stats for {{ rsn }}</h1>
+  <ul>
+    {% for stat_name, value in stats.items() %}
+      <li><strong>{{ stat_name }}:</strong> {{ value }}</li>
+    {% endfor %}
+  </ul>
+  <a href="/link">Link a different RSN</a>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Link Your RuneScape Account</title>
+</head>
+<body>
+  <h1>Link Your RuneScape Account</h1>
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% endif %}
+  <form method="POST">
+    <label for="rsn">Enter your RSN (RuneScape Name):</label><br>
+    <input type="text" id="rsn" name="rsn" required>
+    <button type="submit">Link</button>
+  </form>
+</body>
+</html>
