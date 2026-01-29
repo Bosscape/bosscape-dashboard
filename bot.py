@@ -260,6 +260,10 @@ class QueueView(View):
     async def leave_button(self, interaction: discord.Interaction, button: Button):
         await handle_leave(interaction, self.queue_id)
 
+    @discord.ui.button(label="Close (Host)", style=discord.ButtonStyle.gray, custom_id="close_queue")
+    async def close_button(self, interaction: discord.Interaction, button: Button):
+        await handle_close(interaction, self.queue_id)
+
 class JoinVCView(View):
     def __init__(self, url):
         super().__init__(timeout=None)
@@ -356,9 +360,11 @@ async def handle_leave(interaction: discord.Interaction, queue_id: int):
             return
 
         # 1. CHECK IF HOST
-        if str(queue.created_by) == discord_id:
+        # Ensure we compare strings properly
+        host_id = str(queue.created_by).strip()
+        if host_id == discord_id:
             await interaction.response.send_message("🛑 **Host Left:** Disbanding Queue...", ephemeral=True)
-            db.close() # Close session before async call might be cleaner
+            db.close()
             await archive_queue(queue, "Disbanded by Host")
             return
 
@@ -372,23 +378,55 @@ async def handle_leave(interaction: discord.Interaction, queue_id: int):
         else:
             await interaction.response.send_message("⚠️ You are not in this queue.", ephemeral=True)
     finally:
-        # Only close if not already closed
+        # DB close handled in blocks or here if needed
         pass
-    db.close() # Ensuring closure
+    db.close() 
+
+async def handle_close(interaction: discord.Interaction, queue_id: int):
+    discord_id = str(interaction.user.id)
+    db = SessionLocal()
+    try:
+        queue = db.query(Queue).filter_by(id=queue_id).first()
+        if not queue:
+            await interaction.response.send_message("⚠️ Queue not found.", ephemeral=True)
+            return
+            
+        host_id = str(queue.created_by).strip()
+        if host_id != discord_id:
+            await interaction.response.send_message("❌ Only the **Host** can close this queue.", ephemeral=True)
+            return
+            
+        await interaction.response.send_message("🔒 Closing queue...", ephemeral=True)
+        db.close()
+        await archive_queue(queue, "Closed by Host")
+        
+    except Exception as e:
+        await interaction.response.send_message(f"Error: {e}", ephemeral=True)
+    finally:
+        # DB close handled above
+        pass
 
 # --- AUTO-DELETE VOICE CHANNELS ---
 @bot.event
 async def on_voice_state_update(member, before, after):
-    # If user left a channel
+    # Debug Logging to Console
     if before.channel:
+        print(f"[Voice] User left {before.channel.name} (Cat: {before.channel.category_id}) - Members: {len(before.channel.members)}")
+        
+        # If user left a channel
         # Check if it is in our category
         if before.channel.category_id == CATEGORY_ID:
             # Check if empty (0 members)
             if len(before.channel.members) == 0:
-                try:
-                    await before.channel.delete()
-                except Exception as e:
-                    print(f"Error deleting empty VC: {e}")
+                # SAFETY: Only delete if it looks like one of ours
+                if " - Team " in before.channel.name:
+                    print(f"[Voice] Deleting empty channel: {before.channel.name}")
+                    try:
+                        await before.channel.delete()
+                    except Exception as e:
+                        print(f"[Voice] Error deleting: {e}")
+                else:
+                    print(f"[Voice] Skipped deletion (Permanent Channel?): {before.channel.name}")
 
 # --- SYNC LOOP ---
 
