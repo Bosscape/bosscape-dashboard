@@ -1,9 +1,14 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Home | Bosscape{% endblock %}
 
-<!doctype html>
-<html>
-  <head><title>Bosscape</title></head>
-  <body>
-    <h1>Welcome to Bosscape</h1>
-    <a href="{{ url_for('login') }}">Login with Discord</a>
-  </body>
-</html>
+{% block content %}
+    <div class="hero">
+        <img src="{{ url_for('static', filename='img/bosscape_banner.png') }}" alt="Bosscape Banner" class="hero-img">
+        <div class="hero-buttons">
+            <a href="{{ url_for('login') }}" class="btn">Join Discord</a>
+            <a href="{{ url_for('link_rsn') }}" class="btn">Link RSN</a>
+            <a href="{{ url_for('view_stats') }}" class="btn">View Stats</a>
+        </div>
+    </div>
+{% endblock %}

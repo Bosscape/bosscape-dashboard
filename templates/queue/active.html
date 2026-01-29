@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Active Queues | Bosscape{% endblock %}
+
+{% block content %}
+<div class="queue-wrapper">
+    <h2 class="queue-title">Active Queues</h2>
+
+    <div style="text-align: right; margin-bottom: 20px;">
+        <a href="{{ url_for('queue.create_queue') }}" class="btn">Create New Queue</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages" style="margin-bottom: 20px;">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if queues|length == 0 %}
+    <p style="text-align: center; color: #ccc;">No active queues found.</p>
+    {% else %}
+    <div class="queue-list">
+        {% for queue in queues %}
+        <div class="queue-card">
+            <div class="queue-info">
+                <h3>{{ queue.boss }} <span class="badge {{ queue.role.lower() }}">{{ queue.role }}</span></h3>
+                {% if queue.description %}
+                <p style="color: #f1c40f; margin-top: 2px;"><em>{{ queue.description }}</em></p>
+                {% endif %}
+                <p><strong>Host:</strong> <a href="{{ url_for('view_stats', rsn=queue.host_rsn) }}" class="rsn-link">{{
+                        queue.host_rsn }}</a></p>
+                <p><strong>Group:</strong> {{ queue.members|length }} / {{ queue.group_size }}</p>
+
+                <!-- Show Members -->
+                <div class="member-list" style="margin-top: 5px; font-size: 0.8em; color: #888;">
+                    {% for member in queue.members %}
+                    <span style="color: #aaa; margin-right: 5px;">
+                        <a href="{{ url_for('view_stats', rsn=member.rsn) }}" class="rsn-link">{{ member.rsn }}</a>
+                        {% if current_user_id == queue.created_by and member.discord_id != current_user_id %}
+                        <a href="{{ url_for('queue.kick_member', queue_id=queue.id, target_discord_id=member.discord_id) }}"
+                            title="Kick Member"
+                            style="color: #e74c3c; text-decoration: none; font-weight: bold; margin-left: 2px;">[x]</a>
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <p><strong>Expires in:</strong> {{ ((queue.expires_at - now()).seconds // 60) }} min</p>
+            </div>
+            <div class="queue-action">
+                <!-- Check membership -->
+                {% set ns = namespace(is_member=false) %}
+                {% for m in queue.members %}
+                {% if m.discord_id == current_user_id %}
+                {% set ns.is_member = true %}
+                {% endif %}
+                {% endfor %}
+
+                {% if ns.is_member %}
+                <a href="{{ url_for('queue.leave_queue', queue_id=queue.id) }}" class="btn leave-btn"
+                    style="background: #c0392b;">Leave</a>
+                {% elif queue.members|length >= queue.group_size %}
+                <button class="btn full-btn" disabled style="background: #7f8c8d; cursor: not-allowed;">Full</button>
+                {% else %}
+                <a href="{{ url_for('queue.join_queue', queue_id=queue.id) }}" class="btn join-btn"
+                    style="background: #27ae60;">Join</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Basic styling for the queue list - inline for now */
+    .queue-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .queue-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .queue-info h3 {
+        margin: 0 0 10px 0;
+        color: #fff;
+        font-size: 1.2rem;
+    }
+
+    .queue-info p {
+        margin: 5px 0;
+        color: #bbb;
+        font-size: 0.9rem;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: #444;
+        color: #fff;
+        margin-left: 10px;
+        vertical-align: middle;
+        text-transform: capitalize;
+    }
+
+    .badge.learner {
+        background: #27ae60;
+    }
+
+    .badge.teacher {
+        background: #f39c12;
+        color: #000;
+    }
+
+    .badge.sweat {
+        background: #c0392b;
+    }
+
+    .badge.casual {
+        background: #3498db;
+    }
+
+    .flash {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background: #444;
+        color: white;
+    }
+
+    .flash.success {
+        border-left: 5px solid #2ecc71;
+    }
+
+    .flash.error {
+        border-left: 5px solid #e74c3c;
+    }
+
+    .flash.info {
+        border-left: 5px solid #3498db;
+    }
+</style>
+{% endblock %}

@@ -1,15 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>{{ rsn }}'s Stats</title>
-</head>
-<body>
-  <h1>Stats for {{ rsn }}</h1>
-  <ul>
-    {% for stat_name, value in stats.items() %}
-      <li><strong>{{ stat_name }}:</strong> {{ value }}</li>
-    {% endfor %}
-  </ul>
-  <a href="/link">Link a different RSN</a>
-</body>
-</html>
+<!-- templates/stats.html -->
+{% extends "base.html" %}
+{% block title %}{{ rsn }}'s Stats | Bosscape{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+    <h2>{{ rsn }}'s Stats</h2>
+    <div class="combat-level">
+        Combat Level: <strong>{{ stats["Combat Level"] }}</strong>
+    </div>
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th>Skill</th>
+                <th>Level</th>
+                <th>XP</th>
+                <th>Rank</th>
+            </tr>
+        </thead>
+<tbody>
+{% for skill, data in stats.items() if skill != "Combat Level" %}
+    <tr>
+        <td>
+            <img src="{{ url_for('static', filename='img/skills/' + skill|lower + '.png') }}"
+                 alt="{{ skill }} icon" width="24" height="24">
+            {{ skill }}
+        </td>
+        <td>{{ data.level }}</td>
+        <td>{{ data.xp }}</td>
+        <td>{{ data.rank }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+    </table>
+</div>
+{% endblock %}

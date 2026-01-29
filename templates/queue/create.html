@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Create Queue | Bosscape{% endblock %}
+
+{% block content %}
+<div class="queue-wrapper">
+    <h2 class="queue-title">Create a New Queue</h2>
+
+    <form method="POST" class="queue-form">
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" name="category" required onchange="updateActivityList()">
+                <option value="">-- Select Category --</option>
+                <option value="Boss">Boss</option>
+                <option value="Raid">Raid</option>
+                <option value="Event">Event</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="activity">Activity (Boss / Raid):</label>
+            <select id="activity" name="activity" required>
+                <option value="">-- Select an activity --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Type:</label>
+            <select id="role" name="role" required>
+                <option value="Learner">Learner</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Casual">Casual</option>
+                <option value="Experienced">Experienced</option>
+                <option value="Sweat">Sweat</option>
+                <option value="Event">Event</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="group_size">Group Size (2–100):</label>
+            <input type="number" id="group_size" name="group_size" min="2" max="100" required>
+        </div>
+
+        <div class="form-group">
+            <label for="expires_in">Expire After (minutes, max 180):</label>
+            <input type="number" id="expires_in" name="expires_in" min="1" max="180" value="60" required>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes (Optional):</label>
+            <input type="text" id="notes" name="notes" placeholder="e.g. 300 invo, Duo only, chill run" maxlength="100">
+        </div>
+
+        <button type="submit" class="btn">Start Queue</button>
+    </form>
+</div>
+
+<script>
+    const ACTIVITIES = {
+        Boss: [
+            "Callisto", "Chaos Elemental", "Corporeal", "Dagannoth Kings",
+            "Giant Mole", "Graardor", "Hueycoatl", "Kalphite Queen",
+            "King Black Dragon", "Kree'arra", "K'ril", "Nex",
+            "Nightmare", "Sarachnis", "Scorpia", "Scurrius",
+            "Tempoross", "Venenatis", "Wintertodt", "Yama",
+            "Zalcano", "Zilyana"
+        ],
+        Raid: ["ToA", "ToB", "CoX"],
+        Event: ["Event"]
+    };
+
+    function updateActivityList() {
+        const category = document.getElementById("category").value;
+        const activitySelect = document.getElementById("activity");
+
+        activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+        if (ACTIVITIES[category]) {
+            ACTIVITIES[category].forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item;
+                opt.textContent = item;
+                activitySelect.appendChild(opt);
+            });
+        }
+    }
+</script>
+{% endblock %}

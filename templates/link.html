@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Link Your RuneScape Account</title>
+    <meta charset="UTF-8">
+    <title>Link your OSRS Account</title>
+    <style>
+        body { font-family: Arial; background: #111; color: #eee; text-align: center; padding-top: 50px; }
+        form { display: inline-block; background: #222; padding: 20px; border-radius: 8px; }
+        input[type="text"] { padding: 10px; width: 250px; margin-bottom: 10px; }
+        input[type="submit"] { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
-  <h1>Link Your RuneScape Account</h1>
-  {% if error %}
-    <p style="color: red;">{{ error }}</p>
-  {% endif %}
-  <form method="POST">
-    <label for="rsn">Enter your RSN (RuneScape Name):</label><br>
-    <input type="text" id="rsn" name="rsn" required>
-    <button type="submit">Link</button>
-  </form>
+    <h1>Link your RuneScape Name</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST">
+        <input type="text" name="rsn" placeholder="Enter your OSRS username" required><br>
+        <input type="submit" value="Link RSN">
+    </form>
 </body>
 </html>
